@@ -1,0 +1,652 @@
+<title>Семейный бюджет</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<style>
+:root{
+  --bg:#F3F4FA; --surface:#FFFFFF; --surface-2:#F8F8FD; --ink:#161A35; --muted:#5D6388; --faint:#8B90B0; --line:#E2E4F0;
+  --accent:#4F46E5; --good:#12A150; --warn:#D99500; --bad:#E5484D; --neutral:#9AA0BD;
+  --good-bg:#E4F6EB; --warn-bg:#FFF3D6; --bad-bg:#FDE7E8; --neutral-bg:#EEEFF6;
+  --c-products:#16A571; --c-me:#3B7BF6; --c-wife:#E64D9A; --c-kid:#F2A20C; --c-kindergarten:#8B5CF6;
+  --c-fuel:#F4702A; --c-telecom:#0CB2C9; --c-cloud:#5B5FE8; --c-household:#7FC21A; --c-other:#98A2B8;
+  --shadow:0 1px 2px rgba(22,26,53,.05),0 6px 20px rgba(22,26,53,.06);
+  --display:"Unbounded","Arial Black",system-ui,sans-serif;
+  --body:"Manrope",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme:dark;
+    --bg:#0E1122; --surface:#171B32; --surface-2:#1C2140; --ink:#EDEFFB; --muted:#A0A6CA; --faint:#747BA3; --line:#2A3052;
+    --accent:#8B85FF; --good:#34D07F; --warn:#F5C04A; --bad:#FF6B70; --neutral:#7A80A6;
+    --good-bg:#15392A; --warn-bg:#3A3016; --bad-bg:#40202A; --neutral-bg:#23284A;
+    --c-products:#2FD08F; --c-me:#62A0FF; --c-wife:#FF6FB5; --c-kid:#FFB938; --c-kindergarten:#A98BFF;
+    --c-fuel:#FF8A4C; --c-telecom:#2FD3E8; --c-cloud:#8286FF; --c-household:#A5E640; --c-other:#8A93AD;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme:dark;
+  --bg:#0E1122; --surface:#171B32; --surface-2:#1C2140; --ink:#EDEFFB; --muted:#A0A6CA; --faint:#747BA3; --line:#2A3052;
+  --accent:#8B85FF; --good:#34D07F; --warn:#F5C04A; --bad:#FF6B70; --neutral:#7A80A6;
+  --good-bg:#15392A; --warn-bg:#3A3016; --bad-bg:#40202A; --neutral-bg:#23284A;
+  --c-products:#2FD08F; --c-me:#62A0FF; --c-wife:#FF6FB5; --c-kid:#FFB938; --c-kindergarten:#A98BFF;
+  --c-fuel:#FF8A4C; --c-telecom:#2FD3E8; --c-cloud:#8286FF; --c-household:#A5E640; --c-other:#8A93AD;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.25);
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.45;font-variant-numeric:tabular-nums}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:16px;padding-block:20px 56px;display:flex;flex-direction:column;gap:18px}
+h1,h2{font-family:var(--display);margin:0;text-wrap:balance;letter-spacing:-.01em}
+h1{font-size:clamp(24px,4vw,34px);font-weight:700}
+h2{font-size:16px;font-weight:500}
+.eyebrow{font-size:11.5px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:700}
+.muted{color:var(--muted)}
+.card{background:var(--surface);border-radius:18px;box-shadow:var(--shadow);padding:18px}
+.card-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.grid{display:grid;gap:18px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr))}
+.g-kpi{grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px}
+
+/* header */
+.top{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap}
+.period{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.chip-static{background:var(--surface);border-radius:999px;padding:6px 12px;font-weight:700;font-size:13px;box-shadow:var(--shadow)}
+
+/* ribbon */
+.ribbon-card{padding:22px 18px 18px}
+.ribbon-nums{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.big{font-family:var(--display);font-weight:700;font-size:clamp(30px,6vw,48px);line-height:1}
+.of{font-size:16px;color:var(--muted);font-weight:600}
+.ribbon{position:relative;height:30px;border-radius:10px;background:var(--surface-2);margin-top:16px;display:flex;overflow:hidden;outline:1px solid var(--line)}
+.ribbon span{height:100%}
+.ribbon-marker{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--ink);border-radius:2px}
+.ribbon-wrap{position:relative}
+.ribbon-scale{display:flex;justify-content:space-between;font-size:12px;color:var(--faint);margin-top:6px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+
+/* kpi */
+.kpi{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.kpi b{font-family:var(--display);font-weight:500;font-size:22px}
+.kpi small{color:var(--muted);font-size:12.5px}
+
+/* pills */
+.pill{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:700;white-space:nowrap}
+.pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
+.s-good{color:var(--good);background:var(--good-bg)}
+.s-warn{color:var(--warn);background:var(--warn-bg)}
+.s-bad{color:var(--bad);background:var(--bad-bg)}
+.s-neutral{color:var(--neutral);background:var(--neutral-bg)}
+
+/* advice */
+.advice{display:flex;flex-direction:column;gap:10px}
+.advice li{list-style:none;display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:12px;background:var(--surface-2)}
+.advice ul{margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.dot{flex:0 0 10px;height:10px;border-radius:50%;margin-top:6px}
+
+/* category bars */
+.cats{display:flex;flex-direction:column;gap:14px}
+.cat-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 12px;align-items:center}
+.cat-name{display:flex;align-items:center;gap:6px 8px;font-weight:700;min-width:0;flex-wrap:wrap}
+.cat-name i{flex:0 0 12px;height:12px;border-radius:4px}
+.cat-num{font-size:13px;color:var(--muted);text-align:right}
+.cat-num b{color:var(--ink)}
+.bar{grid-column:1/-1;position:relative;height:12px;border-radius:6px;background:var(--surface-2);outline:1px solid var(--line)}
+.bar>span{position:absolute;left:0;top:0;bottom:0;border-radius:6px;min-width:0}
+.bar .norm{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--ink);opacity:.55;border-radius:1px}
+.cat-foot{grid-column:1/-1;display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--faint)}
+
+/* envelopes */
+.env{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:10px}
+.env-card{border-radius:14px;padding:12px;background:var(--surface-2);display:flex;flex-direction:column;gap:6px;outline:1px solid var(--line)}
+.env-card.now{outline:2px solid var(--c-products)}
+.env-card .t{font-weight:800;font-size:13.5px}
+.env-card .d{font-size:12px;color:var(--faint)}
+.env-card .m{font-size:13px;color:var(--muted)}
+.env-card .m b{color:var(--ink);font-size:15px}
+.mini{height:8px;border-radius:4px;background:var(--surface);position:relative;overflow:hidden;outline:1px solid var(--line)}
+.mini span{position:absolute;left:0;top:0;bottom:0;background:var(--c-products);border-radius:4px}
+
+/* donut + members */
+.donut-box{display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.donut-box svg{width:190px;max-width:100%;height:auto;flex:0 0 auto}
+.donut-list{flex:1 1 200px;display:flex;flex-direction:column;gap:6px;font-size:13.5px}
+.donut-list div{display:flex;justify-content:space-between;gap:10px}
+.donut-list i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:8px}
+.members{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,120px),1fr));gap:10px;margin-top:16px}
+.member{border-radius:14px;padding:12px;background:var(--surface-2)}
+.member b{display:block;font-family:var(--display);font-weight:500;font-size:18px;margin-top:2px}
+.member small{color:var(--muted);font-size:12px}
+
+/* sub bars */
+.subs{display:flex;flex-direction:column;gap:10px}
+.sub{display:grid;grid-template-columns:minmax(90px,150px) 1fr auto;gap:10px;align-items:center;font-size:13.5px}
+.sub .bar{grid-column:auto;height:10px}
+
+/* charts */
+.chart{width:100%;height:auto;display:block}
+.chart text{fill:var(--muted);font-family:var(--body);font-size:11px}
+.chart .grid-l{stroke:var(--line);stroke-width:1}
+.chart-legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin-top:8px}
+.chart-legend span::before{content:"";display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:6px;vertical-align:3px;background:var(--lc)}
+
+/* journal */
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.fchip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:6px 12px;font:600 13px var(--body);cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+.fchip i{width:9px;height:9px;border-radius:3px}
+.fchip[aria-pressed="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.fchip:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+select,input[type="search"]{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:7px 10px;font:500 13.5px var(--body)}
+input[type="search"]{flex:1 1 180px;min-width:0}
+.table-wrap{overflow-x:auto;border-radius:12px;outline:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;min-width:760px;font-size:13.5px}
+th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:700;padding:10px 12px;background:var(--surface-2);position:sticky;top:0}
+td{padding:9px 12px;border-top:1px solid var(--line);vertical-align:top}
+td.num,th.num{text-align:right;white-space:nowrap}
+tr.day td{background:var(--surface-2);font-weight:800;border-top:2px solid var(--line)}
+.tag{display:inline-flex;align-items:center;gap:6px;font-weight:700;white-space:nowrap}
+.tag i{width:9px;height:9px;border-radius:3px}
+.note{color:var(--faint);font-size:12.5px}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.foot{color:var(--faint);font-size:12.5px;text-align:center}
+
+/* md tables */
+.span2{grid-column:1/-1}
+.tbl table{min-width:0}
+.tbl .table-wrap{outline:none;border-radius:0}
+.tbl td,.tbl th{padding:8px 10px}
+.tbl tr.total td{font-weight:800;border-top:2px solid var(--line);background:var(--surface-2)}
+.tbl .table-wrap table{min-width:520px}
+.tbl td[data-label="Даты"]{white-space:nowrap}
+.tbl.narrow .table-wrap table{min-width:0}
+
+
+details.tbl>summary{list-style:none;cursor:pointer;position:relative;padding-right:28px}
+details.tbl>summary::-webkit-details-marker{display:none}
+details.tbl>summary::after{content:"";position:absolute;right:4px;top:50%;width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:translateY(-70%) rotate(45deg);transition:transform .2s}
+details.tbl[open]>summary::after{transform:translateY(-30%) rotate(-135deg)}
+details.tbl:not([open])>summary{margin-bottom:0}
+details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+#tables{align-items:start}
+/* phone */
+@media (max-width:640px){
+  body{font-size:14.5px}
+  .wrap{gap:14px;padding-block:14px 40px}
+  .card{padding:14px;border-radius:16px}
+  .card-head{margin-bottom:10px}
+  .top{align-items:flex-start}
+  .ribbon-card{padding:16px 14px 14px}
+  .ribbon{height:24px}
+  .ribbon-scale{font-size:11px;gap:8px}
+  .ribbon-scale span:nth-child(2){text-align:center}
+  .legend{gap:4px 10px;font-size:12px}
+  .g-kpi{grid-template-columns:1fr 1fr;gap:10px}
+  .kpi{padding:12px}
+  .kpi b{font-size:17px}
+  .kpi small{font-size:11.5px}
+  .env{grid-template-columns:1fr 1fr;gap:8px}
+  .env-card{padding:10px}
+  .env-card>div:first-child{flex-direction:column;align-items:flex-start!important}
+  .sub{grid-template-columns:minmax(80px,110px) 1fr auto;gap:8px;font-size:13px}
+  .donut-box{justify-content:center}
+  .donut-box svg{width:160px}
+  .members{grid-template-columns:1fr 1fr}
+  #catFilters{flex-wrap:nowrap;overflow-x:auto;width:100%;padding-bottom:4px;scrollbar-width:none}
+  #catFilters::-webkit-scrollbar{display:none}
+  .fchip{flex:0 0 auto}
+  select,input[type="search"]{flex:1 1 140px;font-size:16px}
+  /* tables -> cards */
+  .stack .table-wrap{outline:none;overflow:visible}
+  .stack table,.stack .table-wrap table{min-width:0!important;display:block}
+  .stack thead{display:none}
+  .stack tbody{display:flex;flex-direction:column;gap:8px}
+  .stack tr{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-radius:12px;background:var(--surface-2)}
+  .stack td{display:flex;justify-content:space-between;align-items:center;gap:12px;border:0;padding:0;text-align:right!important;white-space:normal}
+  .stack td::before{content:attr(data-label);color:var(--muted);font-size:12px;font-weight:600;text-align:left;flex:0 0 auto}
+  .stack td:first-child,.stack td.ttl{order:-1;font-weight:800;font-size:14.5px;text-align:left!important;margin-bottom:2px}
+  .stack td:first-child::before,.stack td.ttl::before{display:none}
+  .stack td:empty{display:none}
+  .stack tr.total{background:var(--neutral-bg)}
+  .stack tr.day{background:transparent;padding:8px 2px 0}
+  .stack tr.day td{background:transparent;border:0;font-size:13px}
+  .stack tr.total td{background:transparent;border:0}
+  #tables{gap:10px}
+  /* compact journal */
+  .stack .j-row{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 0;padding:10px 12px}
+  .stack .j-row td{display:inline;font-size:12.5px;color:var(--muted);text-align:left!important}
+  .stack .j-row td::before{display:none!important}
+  .stack .j-row td.ttl{order:-2;flex:0 0 calc(100% - 104px);font-size:14.5px;font-weight:700;color:var(--ink);margin:0 0 4px}
+  .stack .j-row td.num{order:-1;flex:0 0 104px;text-align:right!important;padding-left:10px;font-size:15px;color:var(--ink)}
+  .stack .j-row td:first-child{order:0;font-weight:600;font-size:12.5px}
+  .stack .j-row td:not(.ttl):not(.num):not(.note):not(:first-child):not(:empty)::before{content:"·"!important;display:inline!important;margin:0 6px;color:var(--faint)}
+  .stack .j-row td.note{flex:1 1 100%;margin-top:2px;font-size:12px;color:var(--faint)}
+  .stack .j-row td .tag i{width:7px;height:7px}
+}
+@media (prefers-reduced-motion:no-preference){.bar>span,.mini span,.ribbon span{transition:width .5s ease}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div>
+      <div class="eyebrow" id="periodLabel">Период</div>
+      <h1>Семейный бюджет</h1>
+    </div>
+    <div class="period">
+      <span class="chip-static" id="dayChip">День – из –</span>
+      <span class="chip-static" id="updatedChip">Обновлено –</span>
+    </div>
+  </header>
+
+  <section class="card ribbon-card" aria-label="Лента бюджета">
+    <div class="card-head" style="margin-bottom:0">
+      <div>
+        <div class="eyebrow">Потрачено за период</div>
+        <div class="ribbon-nums"><span class="big" id="spentBig">0 ₽</span><span class="of" id="goalOf">из – ₽</span></div>
+      </div>
+      <span class="pill s-neutral" id="overallPill">нет данных</span>
+    </div>
+    <div class="ribbon-wrap">
+      <div class="ribbon" id="ribbon"></div>
+      <div class="ribbon-marker" id="ribbonMarker" title="Сколько дней прошло"></div>
+    </div>
+    <div class="ribbon-scale"><span>0</span><span id="ribbonMarkerLabel">сегодня по плану</span><span id="ribbonEnd">–</span></div>
+    <div class="legend" id="ribbonLegend"></div>
+  </section>
+
+  <section class="grid g-kpi" id="kpis" aria-label="Главные цифры"></section>
+
+  <section class="card" aria-label="Что поправить">
+    <div class="card-head"><h2>Что поправить</h2><span class="muted" id="adviceDate"></span></div>
+    <div class="advice" id="advice"><p class="muted">Оценка появится после первой записи.</p></div>
+  </section>
+
+  <section class="grid g2">
+    <div class="card">
+      <div class="card-head"><h2>Темп трат</h2><span class="muted">накопительно по дням</span></div>
+      <div id="paceChart"></div>
+      <div class="chart-legend">
+        <span style="--lc:var(--accent)">факт</span>
+        <span style="--lc:var(--faint)">план с учётом закупов</span>
+        <span style="--lc:var(--bad)">лимит периода</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Траты по дням</h2><span class="muted">цвет = категория</span></div>
+      <div id="dailyChart"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Категории</h2><span class="muted">черта на полосе = норма на сегодня</span></div>
+    <div class="cats" id="cats"></div>
+  </section>
+
+  <section class="grid g2">
+    <div class="card">
+      <div class="card-head"><h2>Продуктовые конверты</h2><span class="muted" id="envTotal"></span></div>
+      <div class="env" id="envelopes"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Продукты: на что уходят</h2><span class="muted" id="snackNorm"></span></div>
+      <div class="subs" id="subs"></div>
+    </div>
+  </section>
+
+  <section class="grid g2">
+    <div class="card">
+      <div class="card-head"><h2>Структура трат</h2></div>
+      <div class="donut-box" id="donut"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Кто сколько</h2></div>
+      <div class="members" id="members" style="margin-top:0"></div>
+    </div>
+  </section>
+
+  <section aria-label="Таблицы">
+    <div class="card-head" style="margin:4px 2px 10px"><h2 style="font-size:20px">Таблицы</h2><span class="muted">как в журнале, считаются автоматически</span></div>
+    <div class="grid g2" id="tables"></div>
+  </section>
+
+  <section class="card stack" id="journal">
+    <div class="card-head"><h2>Журнал трат</h2><span class="muted" id="journalCount"></span></div>
+    <div class="filters">
+      <div class="filters" id="catFilters" style="margin:0"></div>
+      <select id="memberFilter" aria-label="Кому">
+        <option value="">Все члены семьи</option>
+      </select>
+      <input type="search" id="searchFilter" placeholder="Поиск: тунец, Магнит…" aria-label="Поиск по трате">
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Дата</th><th>Категория</th><th>Подкатегория</th><th>Кому</th><th>Что</th><th class="num">Сумма</th><th>Оплата</th><th>Примечание</th></tr></thead>
+        <tbody id="rows"><tr><td colspan="8" class="empty">Загружаю записи…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <p class="foot">Траты присылаются в чат с Claude, он раскладывает их по категориям и обновляет эту страницу.</p>
+</div>
+
+<script type="application/json" id="budget-data">{"config": {"period": "2026-09-25_2026-10-31", "start": "2026-09-25", "end": "2026-10-31", "goal": 173048, "stretchGoal": 160000, "stretchNote": "планка с ноября; сейчас идём по плану", "snackWeekly": 1150, "snackSub": "Сладости и снеки", "categories": [{"key": "products", "name": "Продукты", "limit": 59648, "kind": "envelopes"}, {"key": "me", "name": "Личное: Я", "limit": 30000, "kind": "daily"}, {"key": "wife", "name": "Личное: Жена", "limit": 30000, "kind": "daily"}, {"key": "kid", "name": "Ребёнок", "limit": 10000, "kind": "daily"}, {"key": "kindergarten", "name": "Садик", "limit": 12000, "kind": "fixed"}, {"key": "fuel", "name": "Топливо", "limit": 10000, "kind": "daily"}, {"key": "telecom", "name": "Связь и подписки", "limit": 12900, "kind": "fixed"}, {"key": "cloud", "name": "Яндекс Облако", "limit": 6000, "kind": "fixed"}, {"key": "household", "name": "Бытовая химия", "limit": 2500, "kind": "accum"}, {"key": "other", "name": "Прочее", "limit": 0, "kind": "other"}], "envelopes": [{"key": "z1", "name": "Закуп №1", "kind": "bulk", "from": "2026-09-25", "to": "2026-10-01", "amount": 33000}, {"key": "z2", "name": "Закуп №2", "kind": "bulk", "from": "2026-10-12", "to": "2026-10-13", "amount": 5500}, {"key": "w1", "name": "Неделя 1", "kind": "week", "from": "2026-09-25", "to": "2026-10-01", "amount": 4500}, {"key": "w2", "name": "Неделя 2", "kind": "week", "from": "2026-10-02", "to": "2026-10-08", "amount": 4500}, {"key": "w3", "name": "Неделя 3", "kind": "week", "from": "2026-10-09", "to": "2026-10-15", "amount": 4500}, {"key": "w4", "name": "Неделя 4", "kind": "week", "from": "2026-10-16", "to": "2026-10-22", "amount": 4500}, {"key": "w5", "name": "Неделя 5", "kind": "week", "from": "2026-10-23", "to": "2026-10-31", "amount": 6000}]}, "notes": {"updated": "25.09.2026", "headline": "День 1 из 37. Всего потрачено 3 298 ₽, недельные продукты идут быстрее нормы из-за сладкого.", "items": [{"level": "warn", "text": "Снеки и сладости: 1 140 ₽ за первый день при норме 1 150 ₽ на всю неделю. До 1 октября сладкое и снеки не покупаем."}, {"level": "warn", "text": "В конверте «Неделя 1» осталось 2 962 ₽ на 6 дней: только молочка, свежее и хлеб, около 490 ₽ в день."}, {"level": "good", "text": "Тунец и яйца зачтены в «Закуп №1», это запасы, а не перерасход."}, {"level": "warn", "text": "Тунец по 240 ₽ за банку против 195 ₽ в плане. В закупе брать сайру или собственную марку сети."}]}, "expenses": [{"period": "2026-09-25_2026-10-31", "n": 1, "date": "2026-09-25", "category": "products", "sub": "Консервы", "member": "Семья", "item": "Тунец в масле Магуро 170 г × 4", "amount": 959.96, "pay": "нал", "note": "Магнит, чек №17 (итого 2 398)", "envelope": "z1"}, {"period": "2026-09-25_2026-10-31", "n": 2, "date": "2026-09-25", "category": "products", "sub": "Сладости и снеки", "member": "Семья", "item": "Тортимилка × 2, Птица дивная, конфеты Славянка, Twix минис, меренга, печенье Юбилейное × 2, баранки", "amount": 1140.08, "pay": "нал", "note": "Магнит, чек №17; с округлением чека −0,79", "envelope": "w1"}, {"period": "2026-09-25_2026-10-31", "n": 3, "date": "2026-09-25", "category": "products", "sub": "Молочка", "member": "Семья", "item": "Сливки 10%, детские биойогурты Тёма × 2, биотворог Тёма", "amount": 297.96, "pay": "нал", "note": "Магнит, чек №17", "envelope": "w1"}, {"period": "2026-09-25_2026-10-31", "n": 4, "date": "2026-09-25", "category": "products", "sub": "Яйца", "member": "Семья", "item": "Яйца, 2 клетки × 30 шт", "amount": 800, "pay": "нал", "note": "400 ₽ за клетку", "envelope": "z1"}, {"period": "2026-09-25_2026-10-31", "n": 5, "date": "2026-09-25", "category": "products", "sub": "Хлеб", "member": "Семья", "item": "Хлеб × 2", "amount": 100, "pay": "нал", "note": "50 ₽ за шт", "envelope": "w1"}]}</script>
+<script>
+(function(){
+  const state={open:{},cfg:null,exp:[],notes:null,filter:{cat:"",member:"",q:""}};
+  const MEMBERS=["Я","Жена","Ребёнок","Семья"];
+  const $=id=>document.getElementById(id);
+  const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const fmt=n=>Math.round(n).toLocaleString("ru-RU");
+  const rub=n=>fmt(n)+" ₽";
+  const col=k=>`var(--c-${k||"other"})`;
+  const day=s=>{const [y,m,d]=s.split("-").map(Number);return Date.UTC(y,m-1,d)/864e5};
+  const dstr=n=>{const d=new Date(n*864e5);return String(d.getUTCDate()).padStart(2,"0")+"."+String(d.getUTCMonth()+1).padStart(2,"0")};
+  const todayNum=()=>{const t=new Date();return Date.UTC(t.getFullYear(),t.getMonth(),t.getDate())/864e5};
+  const STATUS={good:"s-good",warn:"s-warn",bad:"s-bad",neutral:"s-neutral"};
+  const pill=(st,text)=>`<span class="pill ${STATUS[st]||STATUS.neutral}">${esc(text)}</span>`;
+
+  function ctx(){
+    const c=state.cfg, start=day(c.start), end=day(c.end), days=end-start+1;
+    const t=Math.min(Math.max(todayNum(),start-1),end);
+    const elapsed=Math.max(0,t-start+1);
+    return {start,end,days,t,elapsed,frac:elapsed/days};
+  }
+  function envExpected(e,x){
+    const f=day(e.from),to=day(e.to);
+    if(x.t<f) return 0; if(x.t>=to) return e.amount;
+    return e.amount*(x.t-f+1)/(to-f+1);
+  }
+  function analyse(){
+    const c=state.cfg, x=ctx();
+    const spentBy={}; for(const e of state.exp){spentBy[e.category]=(spentBy[e.category]||0)+e.amount}
+    const envSpent={}; for(const e of state.exp){if(e.envelope) envSpent[e.envelope]=(envSpent[e.envelope]||0)+e.amount}
+    const envs=(c.envelopes||[]).map(e=>({...e,spent:envSpent[e.key]||0,expected:envExpected(e,x),current:x.t>=day(e.from)&&x.t<=day(e.to)}));
+    // snacks this week
+    const week=envs.find(e=>e.kind==="week"&&e.current);
+    let snack=0;
+    if(week){const f=day(week.from),to=day(week.to);for(const e of state.exp){const d=day(e.date);if(e.category==="products"&&e.sub===c.snackSub&&d>=f&&d<=to) snack+=e.amount}}
+    const snackNorm=week?c.snackWeekly*(day(week.to)-day(week.from)+1)/7:c.snackWeekly;
+    const cats=c.categories.map(k=>{
+      const spent=spentBy[k.key]||0;
+      let expected=k.limit*x.frac, st="good", label="в норме";
+      if(k.kind==="envelopes") expected=envs.reduce((a,e)=>a+e.expected,0);
+      if(k.kind==="other"){expected=0; if(spent>0){st="bad";label="есть траты"}}
+      else if(spent>k.limit){st="bad";label="лимит превышен"}
+      else if(k.kind==="fixed"){if(spent===0){st="neutral";label="ждём платёж"}else{label="оплачено"}}
+      else if(k.kind==="accum"){if(spent===0){st="neutral";label="копится"}}
+      else if(spent===0){st="neutral";label="нет трат"}
+      else{const d=(spent-expected)/k.limit; if(d>0.2){st="bad";label="обгон плана"}else if(d>0.1){st="warn";label="обгон плана"}}
+      if(k.key==="products"&&snack>snackNorm&&st==="good"){st="warn";label="снеки сверх нормы"}
+      return {...k,spent,expected,st,label};
+    });
+    const total=state.exp.reduce((a,e)=>a+e.amount,0);
+    const expectedTotal=cats.reduce((a,k)=>a+Math.min(k.expected,k.limit||k.expected),0);
+    const reserved=cats.reduce((a,k)=>a+((k.kind==="fixed"||k.kind==="accum")?Math.max(k.limit-k.spent,0):0),0);
+    const daysLeft=Math.max(1,x.days-x.elapsed+1);
+    const freePerDay=(c.goal-total-reserved)/daysLeft;
+    let forecast=null;
+    if(x.elapsed>=7){
+      forecast=cats.reduce((a,k)=>{
+        if(k.kind==="fixed") return a+Math.max(k.spent,k.limit);
+        if(k.kind==="accum") return a+Math.max(k.spent,k.limit);
+        if(k.kind==="other") return a+k.spent;
+        if(k.kind==="envelopes") return a+Math.max(k.spent,k.limit+(k.spent-k.expected));
+        return a+k.spent/x.elapsed*x.days;
+      },0);
+    }
+    return {x,cats,envs,total,expectedTotal,freePerDay,forecast,snack,snackNorm,week,daysLeft};
+  }
+
+  function render(){
+    if(!state.cfg) return;
+    const c=state.cfg, A=analyse(), x=A.x;
+    $("periodLabel").textContent=`${dstr(x.start)} – ${dstr(x.end)}.${c.end.slice(0,4)} · ${x.days} дней`;
+    $("dayChip").textContent=x.elapsed===0?"Период ещё не начался":`День ${x.elapsed} из ${x.days}`;
+    $("updatedChip").textContent=state.notes?.updated?`Обновлено ${state.notes.updated}`:"Обновлено –";
+    $("spentBig").textContent=rub(A.total);
+    $("goalOf").textContent=`из ${rub(c.goal)}`;
+    // ribbon
+    const byCat=A.cats.filter(k=>k.spent>0);
+    $("ribbon").innerHTML=byCat.map(k=>`<span style="width:${Math.min(100,k.spent/c.goal*100)}%;background:${col(k.key)}" title="${esc(k.name)}: ${rub(k.spent)}"></span>`).join("");
+    const mk=Math.min(100,A.expectedTotal/c.goal*100);
+    $("ribbonMarker").style.left=`calc(${mk}% - 1px)`;
+    $("ribbonMarkerLabel").textContent=`по плану к сегодня: ${rub(A.expectedTotal)}`;
+    $("ribbonEnd").textContent=rub(c.goal);
+    $("ribbonLegend").innerHTML=A.cats.map(k=>`<span><i style="background:${col(k.key)}"></i>${esc(k.name)}</span>`).join("");
+    const ahead=A.total-A.expectedTotal;
+    const ov=ahead>c.goal*0.05?["bad","быстрее плана"]:ahead>0?["warn","чуть быстрее плана"]:["good","в рамках плана"];
+    $("overallPill").outerHTML=`<span class="pill ${STATUS[ov[0]]}" id="overallPill">${ov[1]}</span>`;
+    // kpis
+    const k=[
+      ["Осталось на период",rub(c.goal-A.total),`${A.daysLeft} дн. впереди, включая сегодня`],
+      ["Свободно в день",rub(A.freePerDay),"после садика, связи, облака и химии"],
+      ["Прогноз на период",A.forecast==null?"после 7 дней":rub(A.forecast),A.forecast==null?"мало данных для экстраполяции":(A.forecast<=c.goal?`укладываемся, запас ${rub(c.goal-A.forecast)}`:`перерасход ${rub(A.forecast-c.goal)}`)],
+      ["Ориентир 160 тыс.",rub(c.stretchGoal),c.stretchNote||"планка с ноября"]
+    ];
+    $("kpis").innerHTML=k.map(([a,b,s])=>`<div class="kpi"><span class="eyebrow">${esc(a)}</span><b>${esc(b)}</b><small>${esc(s)}</small></div>`).join("");
+    // advice
+    const n=state.notes;
+    if(n&&Array.isArray(n.items)&&n.items.length){
+      $("adviceDate").textContent=n.updated?`оценка от ${n.updated}`:"";
+      const lv={good:"var(--good)",warn:"var(--warn)",bad:"var(--bad)"};
+      $("advice").innerHTML=(n.headline?`<p style="margin:0;font-weight:700">${esc(n.headline)}</p>`:"")+
+        `<ul>${n.items.map(i=>`<li><span class="dot" style="background:${lv[i.level]||"var(--neutral)"}"></span><span>${esc(i.text)}</span></li>`).join("")}</ul>`;
+    }
+    // categories
+    $("cats").innerHTML=A.cats.map(k=>{
+      const lim=k.limit||1, w=Math.min(100,k.spent/lim*100), nrm=Math.min(100,k.expected/lim*100);
+      const showNorm=k.limit>0&&k.kind!=="fixed";
+      return `<div class="cat-row">
+        <div class="cat-name"><i style="background:${col(k.key)}"></i><span>${esc(k.name)}</span>${pill(k.st,k.label)}</div>
+        <div class="cat-num"><b>${rub(k.spent)}</b> из ${k.limit?rub(k.limit):"0 ₽"}</div>
+        <div class="bar"><span style="width:${w}%;background:${col(k.key)}"></span>${showNorm?`<span class="norm" style="left:calc(${nrm}% - 1px)"></span>`:""}</div>
+        <div class="cat-foot"><span>${k.limit?`осталось ${rub(k.limit-k.spent)}`:"лимита нет"}</span><span>${showNorm?`норма на сегодня ${rub(k.expected)}`:(k.kind==="fixed"?"платится разом":"")}</span></div>
+      </div>`}).join("");
+    // envelopes
+    const envSum=A.envs.reduce((a,e)=>a+e.amount,0), envSp=A.envs.reduce((a,e)=>a+e.spent,0);
+    $("envTotal").textContent=`${rub(envSp)} из ${rub(envSum)}`;
+    $("envelopes").innerHTML=A.envs.map(e=>{
+      const w=Math.min(100,e.spent/e.amount*100);
+      const d=(e.spent-e.expected)/e.amount;
+      const st=e.spent>e.amount?"bad":(e.spent===0&&e.expected===0)?"neutral":d>0.2?"bad":d>0.1?"warn":"good";
+      const lab=e.spent>e.amount?"пуст":e.spent===0&&e.expected===0?"впереди":d>0.1?"быстро":"норма";
+      return `<div class="env-card${e.current?" now":""}">
+        <div style="display:flex;justify-content:space-between;gap:6px;align-items:center"><span class="t">${esc(e.name)}</span>${pill(st,lab)}</div>
+        <span class="d">${dstr(day(e.from))} – ${dstr(day(e.to))}${e.current?" · сейчас":""}</span>
+        <div class="mini"><span style="width:${w}%"></span></div>
+        <span class="m"><b>${rub(e.amount-e.spent)}</b> осталось из ${rub(e.amount)}</span>
+      </div>`}).join("");
+    // product subs
+    const subs={}; for(const e of state.exp){if(e.category==="products"){subs[e.sub||"Другое"]=(subs[e.sub||"Другое"]||0)+e.amount}}
+    const sarr=Object.entries(subs).sort((a,b)=>b[1]-a[1]); const smax=Math.max(1,...sarr.map(s=>s[1]));
+    $("snackNorm").textContent=A.week?`снеки на этой неделе: ${rub(A.snack)} из ${rub(A.snackNorm)}`:"";
+    $("subs").innerHTML=sarr.length?sarr.map(([name,v])=>{
+      const hot=name===c.snackSub&&A.snack>A.snackNorm;
+      return `<div class="sub"><span style="font-weight:600">${esc(name)}</span><div class="bar"><span style="width:${v/smax*100}%;background:${hot?"var(--warn)":"var(--c-products)"}"></span></div><span class="num"><b>${rub(v)}</b></span></div>`}).join(""):`<p class="muted">Пока нет продуктовых трат.</p>`;
+    // donut
+    renderDonut(A);
+    // members
+    const mem={}; for(const e of state.exp){mem[e.member]=(mem[e.member]||0)+e.amount}
+    const ms=[...MEMBERS,...Object.keys(mem).filter(m=>!MEMBERS.includes(m))];
+    $("members").innerHTML=ms.map(m=>`<div class="member"><small>${esc(m)}</small><b>${rub(mem[m]||0)}</b><small>${A.total?Math.round((mem[m]||0)/A.total*100):0}% трат</small></div>`).join("");
+    renderPace(A); renderDaily(A); renderTables(A); renderJournal();
+  }
+
+  function renderDonut(A){
+    const parts=A.cats.filter(k=>k.spent>0), tot=parts.reduce((a,k)=>a+k.spent,0);
+    if(!tot){$("donut").innerHTML=`<p class="muted">Пока нет трат.</p>`;return}
+    const R=70,r=44,cx=95,cy=95; let a0=-Math.PI/2; let paths="";
+    for(const k of parts){
+      const a1=a0+k.spent/tot*Math.PI*2, large=(a1-a0)>Math.PI?1:0;
+      if(parts.length===1){paths+=`<circle cx="${cx}" cy="${cy}" r="${(R+r)/2}" fill="none" stroke="${col(k.key)}" stroke-width="${R-r}"/>`;break}
+      const p=(rad,ang)=>`${cx+rad*Math.cos(ang)},${cy+rad*Math.sin(ang)}`;
+      paths+=`<path d="M${p(R,a0)} A${R},${R} 0 ${large} 1 ${p(R,a1)} L${p(r,a1)} A${r},${r} 0 ${large} 0 ${p(r,a0)} Z" fill="${col(k.key)}" stroke="var(--surface)" stroke-width="2"/>`;
+      a0=a1;
+    }
+    const svg=`<svg viewBox="0 0 190 190" role="img" aria-label="Структура трат по категориям">${paths}
+      <text x="95" y="92" text-anchor="middle" style="font:700 15px var(--display);fill:var(--ink)">${fmt(tot)}</text>
+      <text x="95" y="110" text-anchor="middle" style="font:600 11px var(--body);fill:var(--muted)">₽ всего</text></svg>`;
+    const list=parts.sort((a,b)=>b.spent-a.spent).map(k=>`<div><span><i style="background:${col(k.key)}"></i>${esc(k.name)}</span><b>${Math.round(k.spent/tot*100)}% · ${rub(k.spent)}</b></div>`).join("");
+    $("donut").innerHTML=svg+`<div class="donut-list">${list}</div>`;
+  }
+
+  function chartW(id){const w=$(id).clientWidth;return Math.max(280,Math.round(w||560))}
+  function niceMax(v){const p=Math.pow(10,Math.floor(Math.log10(v)));const m=[1,2,2.5,5,10].find(s=>s*p>=v);return m*p}
+
+  function renderPace(A){
+    const c=state.cfg,x=A.x,W=chartW("paceChart"),H=W<480?210:240,L=44,Rr=12,T=14,B=28;
+    const iw=W-L-Rr, ih=H-T-B;
+    // planned cumulative for each day
+    const planAt=dn=>{
+      const f=Math.min(Math.max(dn-x.start+1,0),x.days)/x.days, tx={...x,t:dn};
+      let s=0; for(const k of c.categories){ if(k.kind==="envelopes") s+=(c.envelopes||[]).reduce((a,e)=>a+envExpected(e,tx),0); else s+=k.limit*f }
+      return s;
+    };
+    const byDay={}; for(const e of state.exp){byDay[e.date]=(byDay[e.date]||0)+e.amount}
+    const ymax=niceMax(Math.max(c.goal,A.total)*1.02);
+    const X=i=>L+(i-0.5)/x.days*iw, Y=v=>T+ih-(v/ymax)*ih;
+    let grid="",tick="";
+    for(let i=0;i<=4;i++){const v=ymax*i/4;grid+=`<line class="grid-l" x1="${L}" x2="${W-Rr}" y1="${Y(v)}" y2="${Y(v)}"/>`;tick+=`<text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${v>=1000?fmt(v/1000)+"к":fmt(v)}</text>`}
+    const step=Math.max(1,Math.ceil(x.days/Math.max(2,Math.floor(iw/58))));
+    for(let i=1;i<=x.days;i+=step){tick+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle">${dstr(x.start+i-1)}</text>`}
+    let plan="";for(let i=1;i<=x.days;i++){plan+=(i===1?"M":"L")+X(i)+","+Y(planAt(x.start+i-1))}
+    let cum=0,fact="",area="",last=null;
+    for(let i=1;i<=x.elapsed;i++){const ds=new Date((x.start+i-1)*864e5).toISOString().slice(0,10);cum+=byDay[ds]||0;fact+=(i===1?"M":"L")+X(i)+","+Y(cum);last=[X(i),Y(cum),cum]}
+    if(last) area=fact+`L${last[0]},${Y(0)}L${X(1)},${Y(0)}Z`;
+    const goalLine=`<line x1="${L}" x2="${W-Rr}" y1="${Y(c.goal)}" y2="${Y(c.goal)}" stroke="var(--bad)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+    const todayLine=x.elapsed?`<line x1="${X(x.elapsed)}" x2="${X(x.elapsed)}" y1="${T}" y2="${T+ih}" stroke="var(--ink)" stroke-opacity=".25"/>`:"";
+    $("paceChart").innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Накопительные траты против плана">
+      ${grid}${goalLine}${todayLine}
+      <path d="${plan}" fill="none" stroke="var(--faint)" stroke-width="2" stroke-dasharray="3 4"/>
+      ${area?`<path d="${area}" fill="var(--accent)" fill-opacity=".12"/>`:""}
+      ${fact?`<path d="${fact}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`:""}
+      ${last?`<circle cx="${last[0]}" cy="${last[1]}" r="5" fill="var(--accent)" stroke="var(--surface)" stroke-width="2"/>`:""}
+      ${tick}</svg>`;
+  }
+
+  function renderDaily(A){
+    const x=A.x,W=chartW("dailyChart"),H=W<480?210:240,L=40,Rr=8,T=18,B=28,iw=W-L-Rr,ih=H-T-B;
+    const days={}; for(const e of state.exp){(days[e.date]=days[e.date]||{})[e.category]=((days[e.date]||{})[e.category]||0)+e.amount}
+    const totals=Object.values(days).map(o=>Object.values(o).reduce((a,b)=>a+b,0));
+    const ymax=niceMax(Math.max(1000,...totals));
+    const bw=iw/x.days, X=i=>L+(i-1)*bw, Y=v=>T+ih-(v/ymax)*ih;
+    let grid="",tick="",bars="";
+    for(let i=0;i<=4;i++){const v=ymax*i/4;grid+=`<line class="grid-l" x1="${L}" x2="${W-Rr}" y1="${Y(v)}" y2="${Y(v)}"/>`;tick+=`<text x="${L-8}" y="${Y(v)+4}" text-anchor="end">${v>=1000?fmt(v/1000)+"к":fmt(v)}</text>`}
+    const step=Math.max(1,Math.ceil(x.days/Math.max(2,Math.floor(iw/58))));
+    for(let i=1;i<=x.days;i+=step){tick+=`<text x="${X(i)+bw/2}" y="${H-8}" text-anchor="middle">${dstr(x.start+i-1)}</text>`}
+    const order=state.cfg.categories.map(k=>k.key);
+    for(let i=1;i<=x.days;i++){
+      const ds=new Date((x.start+i-1)*864e5).toISOString().slice(0,10), o=days[ds]; if(!o) continue;
+      let acc=0;
+      for(const key of order){const v=o[key];if(!v)continue;const y0=Y(acc),y1=Y(acc+v);bars+=`<rect x="${X(i)+bw*0.15}" y="${y1}" width="${bw*0.7}" height="${Math.max(0,y0-y1)}" rx="2" fill="${col(key)}"><title>${dstr(x.start+i-1)} · ${esc(state.cfg.categories.find(k=>k.key===key)?.name)}: ${rub(v)}</title></rect>`;acc+=v}
+      if(bw>=18) bars+=`<text x="${X(i)+bw/2}" y="${Y(acc)-6}" text-anchor="middle" style="font-weight:700;fill:var(--ink)">${(acc/1000).toFixed(1).replace(".",",")}к</text>`;
+    }
+    const todayBand=x.elapsed?`<rect x="${X(x.elapsed)}" y="${T}" width="${bw}" height="${ih}" fill="var(--accent)" fill-opacity=".07"/>`:"";
+    $("dailyChart").innerHTML=`<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Траты по дням">${grid}${todayBand}${bars}${tick}</svg>`;
+  }
+
+  function tableCard(title,sub,head,rows,opts={}){
+    const th=head.map((h,i)=>`<th${i&&opts.num!==false?' class="num"':''}>${esc(h)}</th>`).join("");
+    const tr=rows.map(r=>`<tr${r.total?' class="total"':''}>${r.cells.map((c,i)=>`<td data-label="${esc(head[i])}"${i&&opts.num!==false&&!(r.raw&&r.raw.includes(i))?' class="num"':''}>${r.raw&&r.raw.includes(i)?c:esc(c)}</td>`).join("")}</tr>`).join("");
+    const key=opts.key||title, open=key in state.open?state.open[key]:window.innerWidth>640;
+    return `<details class="card tbl stack${opts.span?" span2":""}${opts.narrow?" narrow":""}" data-t="${esc(key)}"${open?" open":""}><summary class="card-head"><h2>${esc(title)}</h2>${sub?`<span class="muted">${esc(sub)}</span>`:""}</summary><div class="table-wrap"><table><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table></div></details>`;
+  }
+  function envState(e){
+    const d=(e.spent-e.expected)/e.amount;
+    if(e.spent>e.amount) return ["bad","пуст"];
+    if(e.spent===0&&e.expected===0) return ["neutral","впереди"];
+    if(d>0.2) return ["bad","быстро"]; if(d>0.1) return ["warn","быстро"]; return ["good","норма"];
+  }
+  function renderTables(A){
+    const c=state.cfg,x=A.x,out=[];
+    // categories
+    const catRows=A.cats.map(k=>{
+      const perDay=(k.kind==="daily"||k.kind==="envelopes")?rub(k.limit/x.days):"";
+      const norm=k.kind==="fixed"?"по факту платежа":k.kind==="accum"?"копится":k.kind==="envelopes"?rub(k.expected)+" по конвертам":k.kind==="other"?"0 ₽":rub(k.expected);
+      return {cells:[k.name,rub(k.limit),perDay,rub(k.spent),rub(k.limit-k.spent),norm,pill(k.st,k.label)],raw:[6]};
+    });
+    const lim=A.cats.reduce((a,k)=>a+k.limit,0);
+    catRows.push({total:1,cells:["Итого",rub(lim),rub(lim/x.days),rub(A.total),rub(lim-A.total),rub(A.expectedTotal),""]});
+    out.push(tableCard("Сводка по категориям",`день ${x.elapsed} из ${x.days}`,["Категория","Лимит","В день","Потрачено","Остаток","Норма на сегодня","Статус"],catRows,{span:1}));
+    // envelopes
+    const envRows=A.envs.map(e=>{const [st,l]=envState(e);return {cells:[e.name+(e.current?" · сейчас":""),`${dstr(day(e.from))} – ${dstr(day(e.to))}`,rub(e.amount),rub(e.spent),rub(e.amount-e.spent),pill(st,l)],raw:[1,5]}});
+    const ea=A.envs.reduce((a,e)=>a+e.amount,0),es=A.envs.reduce((a,e)=>a+e.spent,0);
+    envRows.push({total:1,cells:["Итого","",rub(ea),rub(es),rub(ea-es),""]});
+    out.push(tableCard("Продуктовые конверты","",["Конверт","Даты","Сумма","Потрачено","Остаток","Статус"],envRows));
+    // week pace
+    if(A.week){
+      const w=A.week, wd=x.t-day(w.from)+1, wl=day(w.to)-day(w.from)+1;
+      const bulk=A.envs.filter(e=>e.kind==="bulk"), bs=bulk.reduce((a,e)=>a+e.spent,0), ba=bulk.reduce((a,e)=>a+e.amount,0);
+      const wFrac=w.spent/w.amount, tFrac=wd/wl;
+      const es0=envState(w), wSt=es0[0]==="good"?["good","в норме"]:es0[0]==="neutral"?["neutral","впереди"]:[es0[0],`${Math.round(wFrac*100)}% недели за ${wd} дн. из ${wl}`];
+      const sSt=A.snack>A.snackNorm?["bad","норма превышена"]:A.snack>A.snackNorm*tFrac+A.snackNorm*0.3?["warn","норма почти выбрана"]:["good","в норме"];
+      out.push(tableCard(`Темп: ${w.name}`,`${dstr(day(w.from))} – ${dstr(day(w.to))}, день ${wd} из ${wl}`,["Показатель","Факт","Норма","Статус"],[
+        {cells:["Недельные продукты",rub(w.spent),rub(w.amount),pill(...wSt)],raw:[3]},
+        {cells:["из них снеки и сладости",rub(A.snack),rub(A.snackNorm),pill(...sSt)],raw:[3]},
+        {cells:["Запасы (закупы)",rub(bs),rub(ba),pill(bs>ba?"bad":"good",bs>ba?"закуп превышен":"в рамках закупов")],raw:[3]}
+      ],{key:"week"}));
+    }
+    // products breakdown
+    const subs={}; for(const e of state.exp){if(e.category==="products"){subs[e.sub||"Другое"]=(subs[e.sub||"Другое"]||0)+e.amount}}
+    const ps=Object.values(subs).reduce((a,b)=>a+b,0);
+    const pr=Object.entries(subs).sort((a,b)=>b[1]-a[1]).map(([n,v])=>({cells:[n,rub(v),Math.round(v/ps*100)+"%"]}));
+    if(pr.length){pr.push({total:1,cells:["Итого",rub(ps),"100%"]});out.push(tableCard("Продукты: разбивка",`снеки ≈ ${rub(c.snackWeekly)} в неделю`,["Подкатегория","Потрачено","Доля"],pr,{narrow:1}))}
+    // by day
+    const grp=k=>k==="products"?0:(k==="me"||k==="wife")?1:(k==="kid"||k==="kindergarten")?2:3;
+    const byDay={}; for(const e of state.exp){(byDay[e.date]=byDay[e.date]||[0,0,0,0])[grp(e.category)]+=e.amount}
+    const dr=Object.keys(byDay).sort().map(d=>{const v=byDay[d];return {cells:[`${dstr(day(d))}`,rub(v[0]),rub(v[1]),rub(v[2]),rub(v[3]),rub(v[0]+v[1]+v[2]+v[3])]}});
+    if(dr.length){const t=[0,1,2,3].map(i=>Object.values(byDay).reduce((a,v)=>a+v[i],0));dr.push({total:1,cells:["Итого",...t.map(rub),rub(t.reduce((a,b)=>a+b,0))]})}
+    out.push(tableCard("По дням","Личное = я + жена, Ребёнок = ребёнок + садик",["Дата","Продукты","Личное","Ребёнок","Остальное","Итого за день"],dr.length?dr:[{cells:["нет записей","","","","",""]}]));
+    // members
+    const mem={}; for(const e of state.exp){mem[e.member]=(mem[e.member]||0)+e.amount}
+    const mr=[...MEMBERS,...Object.keys(mem).filter(m=>!MEMBERS.includes(m))].map(m=>({cells:[m,rub(mem[m]||0),(A.total?Math.round((mem[m]||0)/A.total*100):0)+"%"]}));
+    mr.push({total:1,cells:["Итого",rub(A.total),"100%"]});
+    out.push(tableCard("Сводка по членам семьи","",["Кому","Потрачено","Доля"],mr,{narrow:1}));
+    // clothes & fun
+    const sub2=["Одежда","Развлечения"], cols=["Я","Жена","Ребёнок"];
+    const cf=sub2.map(sn=>({cells:[sn,...cols.map(m=>rub(state.exp.filter(e=>e.sub===sn&&e.member===m).reduce((a,e)=>a+e.amount,0)))]}));
+    out.push(tableCard("Одежда и развлечения","внутри Личного и Ребёнка",["Подкатегория",...cols],cf,{narrow:1}));
+    $("tables").innerHTML=out.join("");
+  }
+
+  function renderJournal(){
+    const c=state.cfg, f=state.filter, q=f.q.trim().toLowerCase();
+    const catName=Object.fromEntries(c.categories.map(k=>[k.key,k.name]));
+    // filters UI (once per render; cheap)
+    const cats=["",...c.categories.map(k=>k.key)];
+    $("catFilters").innerHTML=cats.map(k=>`<button type="button" class="fchip" data-cat="${esc(k)}" aria-pressed="${f.cat===k}">${k?`<i style="background:${col(k)}"></i>${esc(catName[k])}`:"Все"}</button>`).join("");
+    const rows=state.exp.filter(e=>(!f.cat||e.category===f.cat)&&(!f.member||e.member===f.member)&&(!q||[e.item,e.note,e.sub].join(" ").toLowerCase().includes(q)))
+      .sort((a,b)=>b.date.localeCompare(a.date)||(b.n||0)-(a.n||0));
+    $("journalCount").textContent=`${rows.length} записей · ${rub(rows.reduce((a,e)=>a+e.amount,0))}`;
+    if(!rows.length){$("rows").innerHTML=`<tr><td colspan="8" class="empty">${state.exp.length?"Ничего не найдено по фильтрам.":"Записей пока нет."}</td></tr>`;return}
+    let html="",cur=null;
+    const sums={}; for(const e of rows){sums[e.date]=(sums[e.date]||0)+e.amount}
+    for(const e of rows){
+      if(e.date!==cur){cur=e.date;html+=`<tr class="day"><td colspan="5">${dstr(day(e.date))}.${e.date.slice(0,4)} · ${rub(sums[e.date])}</td><td colspan="3"></td></tr>`}
+      html+=`<tr class="j-row"><td data-label="Дата">${dstr(day(e.date))}</td><td data-label="Категория"><span class="tag"><i style="background:${col(e.category)}"></i>${esc(catName[e.category]||e.category)}</span></td><td data-label="Подкатегория">${esc(e.sub)}</td><td data-label="Кому">${esc(e.member)}</td><td class="ttl" data-label="Что">${esc(e.item)}</td><td class="num" data-label="Сумма"><b>${rub(e.amount)}</b></td><td data-label="Оплата">${esc(e.pay)}</td><td class="note" data-label="Примечание">${esc(e.note)}</td></tr>`;
+    }
+    $("rows").innerHTML=html;
+  }
+
+  $("tables").addEventListener("toggle",e=>{if(e.target.dataset&&e.target.dataset.t) state.open[e.target.dataset.t]=e.target.open},true);
+  let lastW=window.innerWidth,rt;
+  window.addEventListener("resize",()=>{if(window.innerWidth===lastW)return;lastW=window.innerWidth;clearTimeout(rt);rt=setTimeout(()=>{if(state.cfg)render()},150)});
+  $("catFilters").addEventListener("click",ev=>{const b=ev.target.closest("button[data-cat]");if(!b)return;state.filter.cat=b.dataset.cat;renderJournal()});
+  $("memberFilter").innerHTML+=MEMBERS.map(m=>`<option value="${m}">${m}</option>`).join("");
+  $("memberFilter").addEventListener("change",e=>{state.filter.member=e.target.value;renderJournal()});
+  let qt; $("searchFilter").addEventListener("input",e=>{clearTimeout(qt);qt=setTimeout(()=>{state.filter.q=e.target.value;renderJournal()},150)});
+
+  function showUnavailable(msg){
+    $("rows").innerHTML=`<tr><td colspan="8" class="empty">${esc(msg)}</td></tr>`;
+    $("advice").innerHTML=`<p class="muted">${esc(msg)}</p>`;
+  }
+
+  try{
+    const D=JSON.parse(document.getElementById("budget-data").textContent);
+    state.cfg=D.config; state.notes=D.notes;
+    state.exp=(D.expenses||[]).filter(e=>e.period===D.config.period);
+    render();
+  }catch(err){showUnavailable("Не удалось прочитать данные страницы.")}
+})();
+</script>
