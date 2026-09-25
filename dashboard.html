@@ -183,6 +183,31 @@ details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset
 .save.maybe{color:var(--muted);background:var(--neutral-bg)}
 .potential{display:flex;flex-wrap:wrap;gap:8px 18px;align-items:baseline;margin-bottom:14px;font-size:14px;color:var(--muted)}
 .potential b{font-family:var(--display);font-weight:500;font-size:20px;color:var(--good)}
+
+/* jump nav */
+.jump{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding:2px 0 4px}
+.jump::-webkit-scrollbar{display:none}
+.jump a{flex:0 0 auto;text-decoration:none;color:var(--ink);background:var(--surface);box-shadow:var(--shadow);border-radius:999px;padding:7px 14px;font-weight:700;font-size:13px}
+.jump a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+[id]{scroll-margin-top:16px}
+/* product list */
+.psum{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,170px),1fr));gap:10px;margin-bottom:14px}
+.psum div{border-radius:14px;padding:12px;background:var(--surface-2)}
+.psum b{display:block;font-family:var(--display);font-weight:500;font-size:18px;margin-top:2px}
+.psum small{color:var(--muted);font-size:12px}
+.psum .all{background:var(--good-bg)}
+.psum .all b{color:var(--good)}
+.ptabs{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin-bottom:10px}
+.ptabs::-webkit-scrollbar{display:none}
+.ptabs .fchip{flex:0 0 auto}
+.pwhen{color:var(--muted);font-size:13.5px;margin:0 0 12px}
+.plist table{min-width:0;font-size:14px}
+.plist td,.plist th{padding:8px 10px}
+.plist tr.grp td{background:var(--surface-2);font-weight:800;border-top:2px solid var(--line)}
+.plist tr.tot td{font-weight:800;border-top:2px solid var(--line);background:var(--good-bg);color:var(--ink)}
+.plist td.qty{white-space:nowrap;color:var(--muted)}
+.plist td.pr{white-space:nowrap;color:var(--muted);text-align:right}
+.pabout{color:var(--faint);font-size:12.5px;margin-top:10px}
 /* phone */
 @media (max-width:640px){
   body{font-size:14.5px}
@@ -225,6 +250,12 @@ details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset
   .stack tr.day{background:transparent;padding:8px 2px 0}
   .stack tr.day td{background:transparent;border:0;font-size:13px}
   .stack tr.total td{background:transparent;border:0}
+  .psum{grid-template-columns:1fr 1fr}
+  .psum .all{grid-column:1/-1}
+  .psum b{font-size:16px}
+  .plist table{font-size:13px}
+  .plist td,.plist th{padding:7px 6px}
+  .plist th:first-child,.plist td:first-child{padding-left:8px}
   #tables{gap:10px}
   /* compact journal */
   .stack .j-row{flex-direction:row;flex-wrap:wrap;align-items:baseline;gap:2px 0;padding:10px 12px}
@@ -251,6 +282,15 @@ details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset
       <span class="chip-static" id="updatedChip">Обновлено –</span>
     </div>
   </header>
+
+  <nav class="jump" aria-label="Разделы страницы">
+    <a href="#kpis">Сводка</a>
+    <a href="#cats">Категории</a>
+    <a href="#tables-sec">Таблицы</a>
+    <a href="#plist">Список продуктов</a>
+    <a href="#journal">Журнал</a>
+    <a href="#savings">Экономия</a>
+  </nav>
 
   <section class="card ribbon-card" aria-label="Лента бюджета">
     <div class="card-head" style="margin-bottom:0">
@@ -318,9 +358,21 @@ details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset
     </div>
   </section>
 
-  <section aria-label="Таблицы">
+  <section aria-label="Таблицы" id="tables-sec">
     <div class="card-head" style="margin:4px 2px 10px"><h2 style="font-size:20px">Таблицы</h2><span class="muted">как в журнале, считаются автоматически</span></div>
     <div class="grid g2" id="tables"></div>
+  </section>
+
+  <section class="card" id="plist" aria-label="Список продуктов">
+    <div class="card-head"><h2>Список продуктов</h2><span class="muted">плановый, по закупам и неделям</span></div>
+    <div class="psum" id="psum"></div>
+    <div class="ptabs" role="tablist" id="ptabs"></div>
+    <p class="pwhen" id="pwhen"></p>
+    <div class="table-wrap plist"><table>
+      <thead><tr><th>Продукт</th><th>Кол-во</th><th class="num">Цена</th><th class="num">Сумма</th></tr></thead>
+      <tbody id="prows"></tbody>
+    </table></div>
+    <p class="pabout" id="pabout"></p>
   </section>
 
   <section class="card stack" id="journal">
@@ -349,10 +401,10 @@ details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset
   <p class="foot">Траты присылаются в чат с Claude, он раскладывает их по категориям и обновляет эту страницу.</p>
 </div>
 
-<script type="application/json" id="budget-data">{"config": {"period": "2026-09-25_2026-10-31", "start": "2026-09-25", "end": "2026-10-31", "goal": 173048, "stretchGoal": 160000, "stretchNote": "планка с ноября; сейчас идём по плану", "snackWeekly": 1150, "snackSub": "Сладости и снеки", "categories": [{"key": "products", "name": "Продукты", "limit": 59648, "kind": "envelopes"}, {"key": "me", "name": "Личное: Я", "limit": 30000, "kind": "daily"}, {"key": "wife", "name": "Личное: Жена", "limit": 30000, "kind": "daily"}, {"key": "kid", "name": "Ребёнок", "limit": 10000, "kind": "daily"}, {"key": "kindergarten", "name": "Садик", "limit": 12000, "kind": "fixed"}, {"key": "fuel", "name": "Топливо", "limit": 10000, "kind": "daily"}, {"key": "telecom", "name": "Связь и подписки", "limit": 12900, "kind": "fixed"}, {"key": "cloud", "name": "Яндекс Облако", "limit": 6000, "kind": "fixed"}, {"key": "household", "name": "Бытовая химия", "limit": 2500, "kind": "accum"}, {"key": "other", "name": "Прочее", "limit": 0, "kind": "other"}], "envelopes": [{"key": "z1", "name": "Закуп №1", "kind": "bulk", "from": "2026-09-25", "to": "2026-10-01", "amount": 33000}, {"key": "z2", "name": "Закуп №2", "kind": "bulk", "from": "2026-10-12", "to": "2026-10-13", "amount": 5500}, {"key": "w1", "name": "Неделя 1", "kind": "week", "from": "2026-09-25", "to": "2026-10-01", "amount": 4500}, {"key": "w2", "name": "Неделя 2", "kind": "week", "from": "2026-10-02", "to": "2026-10-08", "amount": 4500}, {"key": "w3", "name": "Неделя 3", "kind": "week", "from": "2026-10-09", "to": "2026-10-15", "amount": 4500}, {"key": "w4", "name": "Неделя 4", "kind": "week", "from": "2026-10-16", "to": "2026-10-22", "amount": 4500}, {"key": "w5", "name": "Неделя 5", "kind": "week", "from": "2026-10-23", "to": "2026-10-31", "amount": 6000}]}, "notes": {"updated": "25.09.2026", "headline": "День 1 из 37. Потрачено 8 098 ₽: продукты 3 298 ₽ и топливо 4 800 ₽.", "items": [{"level": "warn", "text": "Топливо: 4 800 ₽ за один день, это 48% лимита на период. Красный статус здесь от разовой заправки: при норме 270 ₽ в день её хватает до ≈ 12 октября. Следующую заправку до этой даты не делать, после неё на 19 дней останется 5 200 ₽."}, {"level": "warn", "text": "Снеки и сладости: 1 140 ₽ за первый день при норме 1 150 ₽ на всю неделю. До 1 октября сладкое и снеки не покупаем."}, {"level": "warn", "text": "В конверте «Неделя 1» осталось 2 962 ₽ на 6 дней: только молочка, свежее и хлеб, около 490 ₽ в день."}, {"level": "good", "text": "Тунец и яйца зачтены в «Закуп №1», это запасы, а не перерасход."}, {"level": "warn", "text": "Тунец по 240 ₽ за банку против 195 ₽ в плане. В закупе брать сайру или собственную марку сети."}]}, "expenses": [{"period": "2026-09-25_2026-10-31", "n": 1, "date": "2026-09-25", "category": "products", "sub": "Консервы", "member": "Семья", "item": "Тунец в масле Магуро 170 г × 4", "amount": 959.96, "pay": "нал", "note": "Магнит, чек №17 (итого 2 398)", "envelope": "z1"}, {"period": "2026-09-25_2026-10-31", "n": 2, "date": "2026-09-25", "category": "products", "sub": "Сладости и снеки", "member": "Семья", "item": "Тортимилка × 2, Птица дивная, конфеты Славянка, Twix минис, меренга, печенье Юбилейное × 2, баранки", "amount": 1140.08, "pay": "нал", "note": "Магнит, чек №17; с округлением чека −0,79", "envelope": "w1"}, {"period": "2026-09-25_2026-10-31", "n": 3, "date": "2026-09-25", "category": "products", "sub": "Молочка", "member": "Семья", "item": "Сливки 10%, детские биойогурты Тёма × 2, биотворог Тёма", "amount": 297.96, "pay": "нал", "note": "Магнит, чек №17", "envelope": "w1"}, {"period": "2026-09-25_2026-10-31", "n": 4, "date": "2026-09-25", "category": "products", "sub": "Яйца", "member": "Семья", "item": "Яйца, 2 клетки × 30 шт", "amount": 800, "pay": "нал", "note": "400 ₽ за клетку", "envelope": "z1"}, {"period": "2026-09-25_2026-10-31", "n": 5, "date": "2026-09-25", "category": "products", "sub": "Хлеб", "member": "Семья", "item": "Хлеб × 2", "amount": 100, "pay": "нал", "note": "50 ₽ за шт", "envelope": "w1"}, {"period": "2026-09-25_2026-10-31", "n": 6, "date": "2026-09-25", "category": "fuel", "sub": "Бензин", "member": "Семья", "item": "Бензин", "amount": 3000, "pay": "нал", "note": "способ оплаты не уточнён"}, {"period": "2026-09-25_2026-10-31", "n": 7, "date": "2026-09-25", "category": "fuel", "sub": "Газ", "member": "Семья", "item": "Газ", "amount": 1800, "pay": "нал", "note": "способ оплаты не уточнён"}], "advice": {"updated": "25.09.2026", "target": "до цели 160 000 ₽ с ноября нужно −13 048 ₽ в месяц", "groups": [{"title": "Тормознуть сейчас", "level": "bad", "items": [{"text": "Сладости и снеки до 1 октября не покупать: недельная норма 1 150 ₽ выбрана в первый же день."}, {"text": "Не заправляться до ≈ 12 октября: 4 800 ₽ уже потрачено, при норме 270 ₽ в день этого хватает на 18 дней."}, {"text": "Неделя 1: на оставшиеся 6 дней 2 962 ₽, только молочка, свежее и хлеб, около 490 ₽ в день."}]}, {"title": "Куда посмотреть", "level": "warn", "items": [{"text": "Консервы: тунец Магуро по 240 ₽ против 195 ₽ в плане. Сайра или собственная марка сети на 8 банок в месяц.", "save": 360, "per": "/мес"}, {"text": "Топливо: газ примерно вдвое дешевле бензина на километр. Если машина на газу, бензин оставить только на прогрев и резерв. Экономия зависит от пробега, оценка грубая.", "save": 1000, "per": "/мес"}, {"text": "Яндекс Облако 6 000 ₽: проверить, нет ли простаивающих машин и дисков, прерываемые ВМ дешевле обычных. Оценка без просмотра счёта.", "save": 1500, "per": "/мес"}, {"text": "Claude за $100 (≈ 9 000 ₽) самая крупная подписка. Если лимитов Pro за $20 хватает, разница около 7 200 ₽. Решать по реальной загрузке.", "save": 7200, "per": "/мес"}]}, {"title": "Что уже хорошо", "level": "good", "items": [{"text": "Хлеб по 50 ₽ против 84 ₽ в плане."}, {"text": "Яйца по 133 ₽ за десяток, ровно по плану (130 ₽)."}, {"text": "Запасы (тунец, яйца) идут в счёт закупа, а не недельного конверта."}]}, {"title": "Путь к 160 000 ₽ с ноября", "level": "info", "items": [{"text": "Личное: 26 500 ₽ вместо 30 000 ₽ на каждого.", "save": 7000, "per": "/мес", "core": true}, {"text": "Снеки, сладости и пиво вдвое: ≈ 760 ₽ в неделю вместо 1 523 ₽.", "save": 3000, "per": "/мес", "core": true}, {"text": "Говядина оптом у халяль-фермера (четверть туши, ≈ 800 ₽/кг вместо 1 105 ₽).", "save": 3000, "per": "/мес", "core": true}, {"text": "Собственные марки сетей для круп, макарон, молока: на 20-30% дешевле.", "save": 1000, "per": "/мес", "core": true}, {"text": "Меню на 2 недели до закупа: покупать только под блюда, за хлебом идти только за хлебом."}]}]}}</script>
+<script type="application/json" id="budget-data">{"config": {"period": "2026-09-25_2026-10-31", "start": "2026-09-25", "end": "2026-10-31", "goal": 173048, "stretchGoal": 160000, "stretchNote": "планка с ноября; сейчас идём по плану", "snackWeekly": 1150, "snackSub": "Сладости и снеки", "categories": [{"key": "products", "name": "Продукты", "limit": 59648, "kind": "envelopes"}, {"key": "me", "name": "Личное: Я", "limit": 30000, "kind": "daily"}, {"key": "wife", "name": "Личное: Жена", "limit": 30000, "kind": "daily"}, {"key": "kid", "name": "Ребёнок", "limit": 10000, "kind": "daily"}, {"key": "kindergarten", "name": "Садик", "limit": 12000, "kind": "fixed"}, {"key": "fuel", "name": "Топливо", "limit": 10000, "kind": "daily"}, {"key": "telecom", "name": "Связь и подписки", "limit": 12900, "kind": "fixed"}, {"key": "cloud", "name": "Яндекс Облако", "limit": 6000, "kind": "fixed"}, {"key": "household", "name": "Бытовая химия", "limit": 2500, "kind": "accum"}, {"key": "other", "name": "Прочее", "limit": 0, "kind": "other"}], "envelopes": [{"key": "z1", "name": "Закуп №1", "kind": "bulk", "from": "2026-09-25", "to": "2026-10-01", "amount": 33000}, {"key": "z2", "name": "Закуп №2", "kind": "bulk", "from": "2026-10-12", "to": "2026-10-13", "amount": 5500}, {"key": "w1", "name": "Неделя 1", "kind": "week", "from": "2026-09-25", "to": "2026-10-01", "amount": 4500}, {"key": "w2", "name": "Неделя 2", "kind": "week", "from": "2026-10-02", "to": "2026-10-08", "amount": 4500}, {"key": "w3", "name": "Неделя 3", "kind": "week", "from": "2026-10-09", "to": "2026-10-15", "amount": 4500}, {"key": "w4", "name": "Неделя 4", "kind": "week", "from": "2026-10-16", "to": "2026-10-22", "amount": 4500}, {"key": "w5", "name": "Неделя 5", "kind": "week", "from": "2026-10-23", "to": "2026-10-31", "amount": 6000}]}, "notes": {"updated": "25.09.2026", "headline": "День 1 из 37. Потрачено 8 098 ₽: продукты 3 298 ₽ и топливо 4 800 ₽.", "items": [{"level": "warn", "text": "Топливо: 4 800 ₽ за один день, это 48% лимита на период. Красный статус здесь от разовой заправки: при норме 270 ₽ в день её хватает до ≈ 12 октября. Следующую заправку до этой даты не делать, после неё на 19 дней останется 5 200 ₽."}, {"level": "warn", "text": "Снеки и сладости: 1 140 ₽ за первый день при норме 1 150 ₽ на всю неделю. До 1 октября сладкое и снеки не покупаем."}, {"level": "warn", "text": "В конверте «Неделя 1» осталось 2 962 ₽ на 6 дней: только молочка, свежее и хлеб, около 490 ₽ в день."}, {"level": "good", "text": "Тунец и яйца зачтены в «Закуп №1», это запасы, а не перерасход."}, {"level": "warn", "text": "Тунец по 240 ₽ за банку против 195 ₽ в плане. В закупе брать сайру или собственную марку сети."}]}, "expenses": [{"period": "2026-09-25_2026-10-31", "n": 1, "date": "2026-09-25", "category": "products", "sub": "Консервы", "member": "Семья", "item": "Тунец в масле Магуро 170 г × 4", "amount": 959.96, "pay": "нал", "note": "Магнит, чек №17 (итого 2 398)", "envelope": "z1"}, {"period": "2026-09-25_2026-10-31", "n": 2, "date": "2026-09-25", "category": "products", "sub": "Сладости и снеки", "member": "Семья", "item": "Тортимилка × 2, Птица дивная, конфеты Славянка, Twix минис, меренга, печенье Юбилейное × 2, баранки", "amount": 1140.08, "pay": "нал", "note": "Магнит, чек №17; с округлением чека −0,79", "envelope": "w1"}, {"period": "2026-09-25_2026-10-31", "n": 3, "date": "2026-09-25", "category": "products", "sub": "Молочка", "member": "Семья", "item": "Сливки 10%, детские биойогурты Тёма × 2, биотворог Тёма", "amount": 297.96, "pay": "нал", "note": "Магнит, чек №17", "envelope": "w1"}, {"period": "2026-09-25_2026-10-31", "n": 4, "date": "2026-09-25", "category": "products", "sub": "Яйца", "member": "Семья", "item": "Яйца, 2 клетки × 30 шт", "amount": 800, "pay": "нал", "note": "400 ₽ за клетку", "envelope": "z1"}, {"period": "2026-09-25_2026-10-31", "n": 5, "date": "2026-09-25", "category": "products", "sub": "Хлеб", "member": "Семья", "item": "Хлеб × 2", "amount": 100, "pay": "нал", "note": "50 ₽ за шт", "envelope": "w1"}, {"period": "2026-09-25_2026-10-31", "n": 6, "date": "2026-09-25", "category": "fuel", "sub": "Бензин", "member": "Семья", "item": "Бензин", "amount": 3000, "pay": "нал", "note": "способ оплаты не уточнён"}, {"period": "2026-09-25_2026-10-31", "n": 7, "date": "2026-09-25", "category": "fuel", "sub": "Газ", "member": "Семья", "item": "Газ", "amount": 1800, "pay": "нал", "note": "способ оплаты не уточнён"}], "advice": {"updated": "25.09.2026", "target": "до цели 160 000 ₽ с ноября нужно −13 048 ₽ в месяц", "groups": [{"title": "Тормознуть сейчас", "level": "bad", "items": [{"text": "Сладости и снеки до 1 октября не покупать: недельная норма 1 150 ₽ выбрана в первый же день."}, {"text": "Не заправляться до ≈ 12 октября: 4 800 ₽ уже потрачено, при норме 270 ₽ в день этого хватает на 18 дней."}, {"text": "Неделя 1: на оставшиеся 6 дней 2 962 ₽, только молочка, свежее и хлеб, около 490 ₽ в день."}]}, {"title": "Куда посмотреть", "level": "warn", "items": [{"text": "Консервы: тунец Магуро по 240 ₽ против 195 ₽ в плане. Сайра или собственная марка сети на 8 банок в месяц.", "save": 360, "per": "/мес"}, {"text": "Топливо: газ примерно вдвое дешевле бензина на километр. Если машина на газу, бензин оставить только на прогрев и резерв. Экономия зависит от пробега, оценка грубая.", "save": 1000, "per": "/мес"}, {"text": "Яндекс Облако 6 000 ₽: проверить, нет ли простаивающих машин и дисков, прерываемые ВМ дешевле обычных. Оценка без просмотра счёта.", "save": 1500, "per": "/мес"}, {"text": "Claude за $100 (≈ 9 000 ₽) самая крупная подписка. Если лимитов Pro за $20 хватает, разница около 7 200 ₽. Решать по реальной загрузке.", "save": 7200, "per": "/мес"}]}, {"title": "Что уже хорошо", "level": "good", "items": [{"text": "Хлеб по 50 ₽ против 84 ₽ в плане."}, {"text": "Яйца по 133 ₽ за десяток, ровно по плану (130 ₽)."}, {"text": "Запасы (тунец, яйца) идут в счёт закупа, а не недельного конверта."}]}, {"title": "Путь к 160 000 ₽ с ноября", "level": "info", "items": [{"text": "Личное: 26 500 ₽ вместо 30 000 ₽ на каждого.", "save": 7000, "per": "/мес", "core": true}, {"text": "Снеки, сладости и пиво вдвое: ≈ 760 ₽ в неделю вместо 1 523 ₽.", "save": 3000, "per": "/мес", "core": true}, {"text": "Говядина оптом у халяль-фермера (четверть туши, ≈ 800 ₽/кг вместо 1 105 ₽).", "save": 3000, "per": "/мес", "core": true}, {"text": "Собственные марки сетей для круп, макарон, молока: на 20-30% дешевле.", "save": 1000, "per": "/мес", "core": true}, {"text": "Меню на 2 недели до закупа: покупать только под блюда, за хлебом идти только за хлебом."}]}]}, "products": {"about": "Семья: 2 взрослых + 2 детей · халяль · упор на белок. Цены: Росстат на 07.09.2026 +30%, мясо ещё +15% за халяль; снеки, пиво и сладости по оценке.", "lists": [{"key": "z1", "title": "Закуп №1", "when": "в начале периода, всё мясо и рыба на месяц в морозилку", "total": 32006, "groups": [{"title": "Мясо и рыба", "subtotal": 24778, "items": [{"name": "Говядина (мякоть)", "qty": "10 кг", "price": 1105, "sum": 11050}, {"name": "Куриное филе (грудка)", "qty": "6 кг", "price": 598, "sum": 3588}, {"name": "Фарш говяжий", "qty": "3 кг", "price": 910, "sum": 2730}, {"name": "Рыба мороженая (минтай, хек)", "qty": "4 кг", "price": 494, "sum": 1976}, {"name": "Куриные бёдра / голень", "qty": "4 кг", "price": 416, "sum": 1664}, {"name": "Курица целая", "qty": "4 кг", "price": 390, "sum": 1560}, {"name": "Консервы (тунец, сайра)", "qty": "8 шт", "price": 195, "sum": 1560}, {"name": "Печень куриная", "qty": "2 кг", "price": 325, "sum": 650}]}, {"title": "Бакалея, яйца, овощи, фрукты", "subtotal": 7228, "items": [{"name": "Яйца С1", "qty": "5 десятков", "price": 130, "sum": 650}, {"name": "Масло сливочное 82%", "qty": "0,4 кг", "price": 1430, "sum": 572}, {"name": "Гречка", "qty": "3 кг", "price": 114, "sum": 342}, {"name": "Рис", "qty": "2 кг", "price": 162, "sum": 324}, {"name": "Овсянка (геркулес)", "qty": "2 кг", "price": 117, "sum": 234}, {"name": "Макароны (твёрдые сорта)", "qty": "2 кг", "price": 169, "sum": 338}, {"name": "Чечевица / нут / фасоль", "qty": "1 кг", "price": 208, "sum": 208}, {"name": "Булгур", "qty": "1 кг", "price": 195, "sum": 195}, {"name": "Мука пшеничная", "qty": "2 кг", "price": 74, "sum": 148}, {"name": "Сахар", "qty": "1 кг", "price": 113, "sum": 113}, {"name": "Соль", "qty": "1 кг", "price": 31, "sum": 31}, {"name": "Масло подсолнечное", "qty": "1 л", "price": 205, "sum": 205}, {"name": "Томатная паста", "qty": "2 шт", "price": 117, "sum": 234}, {"name": "Чай чёрный", "qty": "200 г", "price": 1774, "sum": 355, "unit": "кг"}, {"name": "Специи (наборы)", "qty": "4 шт", "price": 104, "sum": 416}, {"name": "Орехи / семечки", "qty": "300 г", "price": 1170, "sum": 351, "unit": "кг"}, {"name": "Замороженные овощи / брокколи", "qty": "2 кг", "price": 325, "sum": 650}, {"name": "Замороженные ягоды", "qty": "1 кг", "price": 520, "sum": 520}, {"name": "Картофель", "qty": "5 кг", "price": 73, "sum": 365}, {"name": "Лук репчатый", "qty": "2 кг", "price": 73, "sum": 146}, {"name": "Морковь", "qty": "2 кг", "price": 73, "sum": 146}, {"name": "Капуста белокочанная", "qty": "2 кг", "price": 57, "sum": 114}, {"name": "Свёкла", "qty": "1 кг", "price": 65, "sum": 65}, {"name": "Чеснок", "qty": "200 г", "price": 390, "sum": 78, "unit": "кг"}, {"name": "Яблоки", "qty": "2 кг", "price": 214, "sum": 428}]}]}, {"key": "z2", "title": "Закуп №2", "when": "в середине периода (≈ 12-13.10), без мяса", "total": 5219, "groups": [{"title": "Крупы, овощи, яйца", "subtotal": 5219, "items": [{"name": "Яйца С1", "qty": "5 десятков", "price": 130, "sum": 650}, {"name": "Масло сливочное 82%", "qty": "0,4 кг", "price": 1430, "sum": 572}, {"name": "Гречка", "qty": "2 кг", "price": 114, "sum": 228}, {"name": "Рис", "qty": "2 кг", "price": 162, "sum": 324}, {"name": "Овсянка (геркулес)", "qty": "1 кг", "price": 117, "sum": 117}, {"name": "Макароны (твёрдые сорта)", "qty": "2 кг", "price": 169, "sum": 338}, {"name": "Чечевица / нут / фасоль", "qty": "1 кг", "price": 208, "sum": 208}, {"name": "Масло подсолнечное", "qty": "1 л", "price": 205, "sum": 205}, {"name": "Томатная паста", "qty": "2 шт", "price": 117, "sum": 234}, {"name": "Орехи / семечки", "qty": "300 г", "price": 1170, "sum": 351, "unit": "кг"}, {"name": "Замороженные овощи / брокколи", "qty": "2 кг", "price": 325, "sum": 650}, {"name": "Картофель", "qty": "5 кг", "price": 73, "sum": 365}, {"name": "Лук репчатый", "qty": "2 кг", "price": 73, "sum": 146}, {"name": "Морковь", "qty": "2 кг", "price": 73, "sum": 146}, {"name": "Капуста белокочанная", "qty": "2 кг", "price": 57, "sum": 114}, {"name": "Свёкла", "qty": "1 кг", "price": 65, "sum": 65}, {"name": "Чеснок", "qty": "200 г", "price": 390, "sum": 78, "unit": "кг"}, {"name": "Яблоки", "qty": "2 кг", "price": 214, "sum": 428}]}]}, {"key": "week", "title": "Каждую неделю", "when": "один поход в неделю ≈ 5 030 ₽; в плане × 4 = 20 119 ₽. В текущем периоде 5 недель: конверт 4 500 ₽, последняя неделя 6 000 ₽", "total": 5031, "groups": [{"title": "Молочка", "subtotal": 2428, "items": [{"name": "Молоко", "qty": "5 л", "price": 127, "sum": 635}, {"name": "Кефир", "qty": "2,5 л", "price": 144, "sum": 360}, {"name": "Творог 5%", "qty": "1 кг", "price": 624, "sum": 624}, {"name": "Йогурт натуральный", "qty": "0,5 кг", "price": 455, "sum": 228}, {"name": "Сметана", "qty": "0,4 кг", "price": 429, "sum": 172}, {"name": "Сыр твёрдый", "qty": "350 г", "price": 1170, "sum": 410, "unit": "кг"}]}, {"title": "Свежее", "subtotal": 1080, "items": [{"name": "Помидоры", "qty": "1 кг", "price": 216, "sum": 216}, {"name": "Огурцы", "qty": "1 кг", "price": 162, "sum": 162}, {"name": "Зелень", "qty": "2 пучка", "price": 78, "sum": 156}, {"name": "Бананы", "qty": "1,25 кг", "price": 195, "sum": 244}, {"name": "Сезонные фрукты", "qty": "0,75 кг", "price": 260, "sum": 195}, {"name": "Яблоки", "qty": "0,5 кг", "price": 214, "sum": 107}]}, {"title": "Снеки, пиво, сладости", "subtotal": 1523, "items": [{"name": "Пиво 0,5 л", "qty": "3 шт", "price": 110, "sum": 330}, {"name": "Чипсы 150 г", "qty": "1-2 пачки", "price": 170, "sum": 255}, {"name": "Арахис / фисташки солёные", "qty": "1 уп", "price": 200, "sum": 200}, {"name": "Конфеты весовые", "qty": "250 г", "price": 700, "sum": 175, "unit": "кг"}, {"name": "Печенье", "qty": "1 уп", "price": 150, "sum": 150}, {"name": "Сырные палочки / кальмар", "qty": "через неделю", "price": 250, "sum": 125}, {"name": "Зефир / пастила", "qty": "через неделю", "price": 200, "sum": 100}, {"name": "Вафли / пряники", "qty": "~1 уп", "price": 130, "sum": 98}, {"name": "Сухарики / крекеры", "qty": "1 уп", "price": 90, "sum": 90}]}]}, {"key": "bread", "title": "Хлеб", "when": "почти каждый день, ≈ 77 ₽ в день", "total": 2304, "groups": [{"title": "На месяц", "subtotal": 2304, "items": [{"name": "Хлеб (буханка ~500 г)", "qty": "20 шт", "price": 84, "sum": 1680}, {"name": "Лаваш / лепёшки", "qty": "8 шт", "price": 78, "sum": 624}]}]}], "summary": [["Закуп №1", "в начале периода", 32006], ["Закуп №2", "середина периода", 5219], ["Каждую неделю × 4", "≈ 5 030 ₽ за поход", 20119], ["Хлеб", "≈ 77 ₽ в день", 2304]], "total": 59648}}</script>
 <script>
 (function(){
-  const state={open:{},cfg:null,exp:[],notes:null,filter:{cat:"",member:"",q:""}};
+  const state={ptab:"z1",open:{},cfg:null,exp:[],notes:null,filter:{cat:"",member:"",q:""}};
   const MEMBERS=["Я","Жена","Ребёнок","Семья"];
   const $=id=>document.getElementById(id);
   const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -489,7 +541,7 @@ details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset
     const mem={}; for(const e of state.exp){mem[e.member]=(mem[e.member]||0)+e.amount}
     const ms=[...MEMBERS,...Object.keys(mem).filter(m=>!MEMBERS.includes(m))];
     $("members").innerHTML=ms.map(m=>`<div class="member"><small>${esc(m)}</small><b>${rub(mem[m]||0)}</b><small>${A.total?Math.round((mem[m]||0)/A.total*100):0}% трат</small></div>`).join("");
-    renderPace(A); renderDaily(A); renderTables(A); renderJournal(); renderSavings();
+    renderPace(A); renderDaily(A); renderTables(A); renderJournal(); renderSavings(); renderProducts();
   }
 
   function renderDonut(A){
@@ -639,6 +691,23 @@ details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset
     $("tips").innerHTML=a.groups.map(g=>`<div class="tip-group"><h3><i style="background:${lv[g.level]||"var(--neutral)"}"></i>${esc(g.title)}</h3><ul>${(g.items||[]).map(i=>`<li><span>${esc(i.text)}</span>${i.save>0?`<span class="save${i.core?"":" maybe"}">−${fmt(i.save)} ₽${i.per?esc(i.per):""}</span>`:""}</li>`).join("")}</ul></div>`).join("");
   }
 
+  function renderProducts(){
+    const P=state.products; if(!P||!Array.isArray(P.lists)) return;
+    if(!P.lists.some(l=>l.key===state.ptab)) state.ptab=P.lists[0].key;
+    $("psum").innerHTML=(P.summary||[]).map(([t,w,v])=>`<div><small>${esc(t)}</small><b>${rub(v)}</b><small>${esc(w)}</small></div>`).join("")+`<div class="all"><small>Всего на месяц</small><b>${rub(P.total)}</b><small>по плану</small></div>`;
+    $("ptabs").innerHTML=P.lists.map(l=>`<button type="button" role="tab" class="fchip" data-p="${esc(l.key)}" aria-selected="${l.key===state.ptab}" aria-pressed="${l.key===state.ptab}">${esc(l.title)}</button>`).join("");
+    const L=P.lists.find(l=>l.key===state.ptab);
+    $("pwhen").textContent=L.when||"";
+    let h="";
+    for(const g of L.groups){
+      if(L.groups.length>1) h+=`<tr class="grp"><td colspan="3">${esc(g.title)}</td><td class="num">${rub(g.subtotal)}</td></tr>`;
+      for(const i of g.items) h+=`<tr><td>${esc(i.name)}</td><td class="qty">${esc(i.qty)}</td><td class="pr">${fmt(i.price)} ₽${i.unit?"/"+esc(i.unit):""}</td><td class="num"><b>${rub(i.sum)}</b></td></tr>`;
+    }
+    h+=`<tr class="tot"><td colspan="3">Итого: ${esc(L.title)}</td><td class="num">${rub(L.total)}</td></tr>`;
+    $("prows").innerHTML=h;
+    $("pabout").textContent=P.about||"";
+  }
+
   function renderJournal(){
     const c=state.cfg, f=state.filter, q=f.q.trim().toLowerCase();
     const catName=Object.fromEntries(c.categories.map(k=>[k.key,k.name]));
@@ -658,6 +727,7 @@ details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset
     $("rows").innerHTML=html;
   }
 
+  $("ptabs").addEventListener("click",ev=>{const b=ev.target.closest("button[data-p]");if(!b)return;state.ptab=b.dataset.p;renderProducts()});
   $("tables").addEventListener("toggle",e=>{if(e.target.dataset&&e.target.dataset.t) state.open[e.target.dataset.t]=e.target.open},true);
   let lastW=window.innerWidth,rt;
   window.addEventListener("resize",()=>{if(window.innerWidth===lastW)return;lastW=window.innerWidth;clearTimeout(rt);rt=setTimeout(()=>{if(state.cfg)render()},150)});
@@ -673,7 +743,7 @@ details.tbl>summary:focus-visible{outline:2px solid var(--accent);outline-offset
 
   try{
     const D=JSON.parse(document.getElementById("budget-data").textContent);
-    state.cfg=D.config; state.notes=D.notes; state.advice=D.advice;
+    state.cfg=D.config; state.notes=D.notes; state.advice=D.advice; state.products=D.products;
     state.exp=(D.expenses||[]).filter(e=>e.period===D.config.period);
     render();
   }catch(err){showUnavailable("Не удалось прочитать данные страницы.")}
