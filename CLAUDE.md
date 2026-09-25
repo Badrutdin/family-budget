@@ -25,4 +25,6 @@
 1. Дописать `data.json`: `expenses[]` {period, n, date "YYYY-MM-DD", category (products|me|wife|kid|kindergarten|fuel|telecom|cloud|household|other), sub, member (Я|Жена|Ребёнок|Семья), item, amount, pay (нал|карта), note, envelope (z1|z2|w1..w5 для продуктов)}; переписать `notes` {updated, headline, items [{level good|warn|bad, text}]}. `config` меняется только при новом периоде.
 2. `python3 update_dashboard.py` (встраивает data.json в dashboard.html).
 3. Перепубликовать `dashboard.html` через Artifact на тот же URL (параметр `url`, если сессия другая).
+4. `git add -A && git commit -m "<English title>" && git push` в репозиторий https://github.com/Badrutdin/family-budget (HTTPS, SSH к GitHub не работает). GitHub Pages собирается из `docs/` (скрипт из шага 2 пишет `docs/index.html`): https://badrutdin.github.io/family-budget/
+Коммиты на английском, только заголовок, без соавторов. Репозиторий публичный: без приватных данных сверх бюджета (никаких паролей, номеров карт, адресов).
 Журнал `.md` и `data.json` должны совпадать.
