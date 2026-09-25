@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Встраивает data.json в dashboard.html и собирает docs/index.html для GitHub Pages."""
+"""Встраивает data.json в dashboard.html, собирает docs/index.html для GitHub Pages и журнал периода .md."""
 import json, re, pathlib
+from journal_md import build
 d = pathlib.Path(__file__).parent
 data = json.dumps(json.load(open(d / "data.json")), ensure_ascii=False).replace("</", "<\\/")
 html = (d / "dashboard.html").read_text()
@@ -16,5 +17,6 @@ page = ('<!doctype html>\n<html lang="ru">\n<head>\n<meta charset="utf-8">\n'
         '</head>\n<body>\n' + html + '\n</body>\n</html>\n')
 (d / "docs").mkdir(exist_ok=True)
 (d / "docs" / "index.html").write_text(page)
+(d / (json.load(open(d / "data.json"))["config"]["period"] + ".md")).write_text(build(json.load(open(d / "data.json"))))
 (d / "docs" / "robots.txt").write_text("User-agent: *\nDisallow: /\n")
 print("ok", json.loads(data.replace("<\\/", "</"))["expenses"].__len__(), "expenses")
