@@ -86,6 +86,23 @@ def build(d, today=None):
     ea, es = sum(e["amount"] for e in envs), sum(e["spent"] for e in envs)
     L += [f"| **Итого** | | **{f(ea)}** | **{f(es)}** | **{f(ea-es)}** | |", "",
           f"Снеки и пиво на текущей неделе: {f(snack)} из {f(snack_norm)} ₽.", ""]
+    W = sorted([e for e in envs if e["kind"] == "week"], key=lambda e: day(e["from"]))
+    carry = 0
+    for e in W:
+        a, b = day(e["from"]), day(e["to"])
+        if t > b or (a <= t and e["spent"] > e["amount"]): carry += e["amount"] - e["spent"]
+    fut = [e for e in W if day(e["from"]) > t]
+    fd = sum(day(e["to"]) - day(e["from"]) + 1 for e in fut)
+    L += ["## Недельные лимиты на продукты", "",
+          (f"Перерасход прошлых недель {f(-carry)} ₽ вычитается из следующих недель" if carry < 0 else f"Остаток прошлых недель {f(carry)} ₽ добавляется к следующим неделям") + " пропорционально дням. Лимит включает хлеб.", "",
+          "| Неделя | Даты | План | Лимит сейчас | Потрачено | Осталось | В день |", "|---|---|---:|---:|---:|---:|---:|"]
+    for e in W:
+        a, b = day(e["from"]), day(e["to"]); ln = b - a + 1
+        if t > b: lim, dl, per = e["amount"], ln, None
+        elif t >= a: lim = e["amount"]; dl = b - t + 1; per = max(0, lim - e["spent"]) / dl
+        else: lim = max(0, e["amount"] + (carry * ln / fd if fd else 0)); per = lim / ln
+        L.append(f"| {e['name']}{' (сейчас)' if a <= t <= b else ''} | {dm(a)} - {dm(b)} | {f(e['amount'])} | {f(lim)} | {f(e['spent'])} | {f(lim - e['spent'])} | {'' if per is None else f(per)} |")
+    L.append("")
     tr = (d.get("tracking") or {}).get("envelopes", {})
     if tr:
         lists = {l["key"]: l for l in d["products"]["lists"]}
