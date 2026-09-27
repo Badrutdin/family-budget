@@ -29,7 +29,7 @@ def build(d, today=None):
     def env_exp(e):
         a, b = day(e["from"]), day(e["to"])
         if t < a: return 0
-        if t >= b: return e["amount"]
+        if t >= b or e["kind"] == "bulk": return e["amount"]
         return e["amount"] * (t - a + 1) / (b - a + 1)
 
     envs = []
