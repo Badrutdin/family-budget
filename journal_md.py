@@ -86,6 +86,25 @@ def build(d, today=None):
     ea, es = sum(e["amount"] for e in envs), sum(e["spent"] for e in envs)
     L += [f"| **Итого** | | **{f(ea)}** | **{f(es)}** | **{f(ea-es)}** | |", "",
           f"Снеки и пиво на текущей неделе: {f(snack)} из {f(snack_norm)} ₽.", ""]
+    tr = (d.get("tracking") or {}).get("envelopes", {})
+    if tr:
+        lists = {l["key"]: l for l in d["products"]["lists"]}
+        L += ["## Закупы: план и факт", ""]
+        for key, t in tr.items():
+            env = next((e for e in envs if e["key"] == key), None)
+            if not env: continue
+            ex = [x for x in exp if x.get("envelope") == key]
+            sp = sum(x["amount"] for x in ex); off = sum(x["amount"] for x in ex if x.get("offlist"))
+            left = sum(v.get("left", 0) for v in t["items"].values())
+            L += [f"**{env['name']}**: план по списку {f(lists[t['list']]['total'])} ₽, потрачено {f(sp)} ₽ (по списку {f(sp-off)}, вне списка {f(off)}), "
+                  f"осталось докупить ≈ {f(left)} ₽, прогноз {f(sp+left)} ₽ при конверте {f(env['amount'])} ₽.", ""]
+            todo = [(k, v) for k, v in t["items"].items() if v["st"] != "done"]
+            if todo:
+                L.append("Не куплено или куплено частично: " + "; ".join(f"{k} ({v['fact'] + ', ' if v['fact'] else ''}≈ {f(v['left'])} ₽)" for k, v in todo) + ".")
+            offs = [x for x in ex if x.get("offlist")]
+            if offs:
+                L.append("Вне списка: " + "; ".join(f"{x['item']} {f(x['amount'])} ₽" for x in offs) + ".")
+            L.append("")
     n = d.get("notes") or {}
     L += ["## Темп и оценка", ""]
     if n.get("headline"): L += [f"**{n.get('updated','')}:** {n['headline']}", ""]
