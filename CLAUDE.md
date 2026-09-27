@@ -21,7 +21,7 @@
 160 000 ₽ в месяц, отлично 150 000, идеал 140 000. План 170 513 ₽ (продукты обновлены 26.09). Период 25.09 - 31.10.2026: цель = план, без урезания. Планка 160 000 ₽ действует с ноября 2026, это первый полный месяц учёта.
 
 ## Меню
-Меню на 2 недели в `data.json` → `menu` и в `plan.md`. Пересоставлять при заметной правке списка продуктов.
+Меню на 2 недели в `data.json` → `menu` (dishes с рецептами + weeks: b/l/d, обед `left` = остатки ужина) и в `plan.md`. Принципы: проще (духовка, один противень, ужин с запасом), вкуснее (маринады, специи), полезнее (меньше жарки и майонеза). Пересоставлять при заметной правке списка продуктов.
 
 ## Дашборд
 Страница: https://claude.ai/artifact/R9Z5sSeACbgtRV41242mut (исходник `dashboard.html`). Данные встроены в страницу, хранилище артефакта (db) НЕ используется: в панели артефакта приложения Claude оно недоступно и страница была пустой.
@@ -29,6 +29,6 @@
 1. Дописать `data.json`: `expenses[]` {period, n, date "YYYY-MM-DD", category (products|me|wife|kid|kindergarten|fuel|telecom|cloud|household|other), sub, member (Я|Жена|Ребёнок|Семья), item, amount, pay (нал|карта), note, envelope (z1|w1..w5 для продуктов; закупа №2 нет)}; переписать `notes` {updated, headline, items [{level good|warn|bad, text}]}. `config` меняется только при новом периоде. `advice` {updated, target, groups [{title, level bad|warn|good|info, items [{text, save ₽/мес, per, core}]}]}: блок «Экономия и рекомендации» внизу страницы. Пересматривать при каждом обновлении, когда меняется картина: убирать неактуальное, добавлять новое по фактическим тратам, `core: true` только для шагов плана к 160 000 ₽.
 2. `python3 update_dashboard.py` (встраивает data.json в dashboard.html).
 3. Перепубликовать `dashboard.html` через Artifact на тот же URL (параметр `url`, если сессия другая).
-4. `git add -A && git commit -m "<English title>" && git push` в репозиторий https://github.com/Badrutdin/family-budget (HTTPS, SSH к GitHub не работает). GitHub Pages собирается из `docs/` (скрипт из шага 2 пишет `docs/index.html`): https://badrutdin.github.io/family-budget/
+4. `git add -A && git commit -m "<English title>" && git push` в репозиторий https://github.com/Badrutdin/family-budget (HTTPS, SSH к GitHub не работает). GitHub Pages собирается из `docs/`: скрипт из шага 2 пишет 5 страниц (index, products, menu, journal, savings) из одного шаблона; разделы шаблона помечены классами `pg pg-<страница>`: https://badrutdin.github.io/family-budget/
 Коммиты на английском, только заголовок, без соавторов. Репозиторий публичный: без приватных данных сверх бюджета (никаких паролей, номеров карт, адресов).
 Журнал `.md` генерируется из `data.json` (`journal_md.py`), поэтому совпадает автоматически. Список продуктов живёт в `data.json` → `products`; при правке списка обновлять и `plan.md`.
